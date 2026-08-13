@@ -27,7 +27,7 @@ The harness input pipeline only recognizes `/` and `@` as trigger characters, so
 ## Install
 
 ```sh
-dsh plugin --profile web add https://github.com/<owner>/dsh-wikilink/archive/refs/heads/main.tar.gz
+dsh plugin --profile web add https://github.com/zhaoscsc/dsh-wikilink/archive/refs/heads/main.tar.gz
 ```
 
 Restart the web server so the host half and the served client bundle pick up the plugin. The enable switch lives in **Settings → Wikilinks**.
