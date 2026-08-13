@@ -1,15 +1,16 @@
 # dsh-wikilink
 
-Obsidian-style `[[wikilink]]` mentions for the DeepSeek Harness web GUI. Type `[[` in the composer and a note-title picker floats up: fuzzy search your workspace notes as you type — including **out-of-order (subsequence) matches** (「曼食」 finds 曼谷美食) and **space-separated multi-term matches** (「曼谷 美食」 finds 曼谷美食). Press Enter to attach, and the referenced note content ships to the model when the message is sent.
+Obsidian-style `[[wikilink]]` mentions for the DeepSeek Harness web GUI. Type `[[` in the composer and a note-title picker floats up: fuzzy search your workspace notes as you type — including **out-of-order (subsequence) matches** (「曼食」 finds 曼谷街头美食文化观察) and **space-separated multi-term matches** (「曼谷 美食」 finds 曼谷街头美食文化观察 / 曼谷笔记：美食 / 曼谷朱拉隆功夜市美食探索). Press Enter to attach, and the referenced note content ships to the model when the message is sent.
 
 ```
 composer:  summarize  [[曼谷 美.    ← picker over the token, auto-closed brackets
-            ┌──────────────────────────────┐
-            │ 📄 曼谷美食   5-存档/…   │
-            │ 📄 曼谷游记   5-存档/…   │
-            └──────────────────────────────┘
-draft:     summarize  [[曼谷美食]]   ← readable plain-text token
-model:     <note path="5-存档/…/曼谷美食.md" title="曼谷美食">…content…</note>  ← injected at send time
+            ┌────────────────────────────────────────────────────────┐
+            │ 📄 曼谷街头美食文化观察：鱼鳔老太太摊位的夜间消费场景          │
+            │ 📄 曼谷笔记：美食                                     │
+            │ 📄 曼谷朱拉隆功夜市美食探索：KINNKUNG海鲜馆的惊喜体验         │
+            └────────────────────────────────────────────────────────┘
+draft:     summarize  [[曼谷笔记：美食]]   ← readable plain-text token
+model:     <note path="5-存档/06-专题档案/数字游民/曼谷笔记：美食.md" title="曼谷笔记：美食">…content…</note>  ← injected at send time
 ```
 
 Typing `[[` auto-closes `]]` with the caret between the brackets (Obsidian-style), and the picker opens exactly on the double bracket — a single `[` in prose never triggers it.
@@ -58,6 +59,14 @@ The index is cached per session for 30 seconds; an index-status strip above the 
 ## Matching
 
 Four tiers over the note title (then the relative path): contiguous substring > subsequence (out-of-order) > path substring > path subsequence. Queries split on whitespace must all match (AND). Both query and titles are NFC-normalized.
+
+Real examples from a travel-note vault:
+
+| Query | Result |
+| --- | --- |
+| `[[曼谷 美食]]` | 曼谷街头美食文化观察：鱼鳔老太太摊位的夜间消费场景 · 曼谷笔记：美食 · 曼谷朱拉隆功夜市美食探索 |
+| `[[曼食]]` (out-of-order) | 曼谷**街**头美**食**文化观察（matches across skipped characters) |
+| `[[鱼鳔]]` | 曼谷街头美食文化观察：鱼鳔老太太摊位的夜间消费场景 |
 
 ## Known limitations
 
