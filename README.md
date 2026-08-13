@@ -1,15 +1,15 @@
 # dsh-wikilink
 
-Obsidian-style `[[wikilink]]` mentions for the DeepSeek Harness web GUI. Type `[[` in the composer and a note-title picker floats up: fuzzy search your workspace notes as you type — including **out-of-order (subsequence) matches** (「成教」 finds 成都教育) and **space-separated multi-term matches** (「四川 资源」 finds 四川矿产资源). Press Enter to attach, and the referenced note content ships to the model when the message is sent.
+Obsidian-style `[[wikilink]]` mentions for the DeepSeek Harness web GUI. Type `[[` in the composer and a note-title picker floats up: fuzzy search your workspace notes as you type — including **out-of-order (subsequence) matches** (「曼食」 finds 曼谷美食) and **space-separated multi-term matches** (「曼谷 美食」 finds 曼谷美食). Press Enter to attach, and the referenced note content ships to the model when the message is sent.
 
 ```
-composer:  summarize  [[四川 资.    ← picker over the token, auto-closed brackets
+composer:  summarize  [[曼谷 美.    ← picker over the token, auto-closed brackets
             ┌──────────────────────────────┐
-            │ 📄 四川矿产资源   5-存档/…   │
-            │ 📄 四川水资源     5-存档/…   │
+            │ 📄 曼谷美食   5-存档/…   │
+            │ 📄 曼谷游记   5-存档/…   │
             └──────────────────────────────┘
-draft:     summarize  [[四川矿产资源]]   ← readable plain-text token
-model:     <note path="5-存档/…/四川矿产资源.md" title="四川矿产资源">…content…</note>  ← injected at send time
+draft:     summarize  [[曼谷美食]]   ← readable plain-text token
+model:     <note path="5-存档/…/曼谷美食.md" title="曼谷美食">…content…</note>  ← injected at send time
 ```
 
 Typing `[[` auto-closes `]]` with the caret between the brackets (Obsidian-style), and the picker opens exactly on the double bracket — a single `[` in prose never triggers it.

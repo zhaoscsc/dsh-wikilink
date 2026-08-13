@@ -2,11 +2,11 @@
  * Pure note-title ranking for the [[ menu: case-insensitive matching over the
  * note title with four tiers — title contiguous substring, title subsequence,
  * relative-path contiguous substring, relative-path subsequence — so a
- * contiguous title hit always outranks a loose subsequence hit (「公考」 must
- * match 公考上岸 before it matches 公务员考核), while the subsequence tier
- * keeps the requested out-of-order matching (「成教」 finds 成都教育). The query
+ * contiguous title hit always outranks a loose subsequence hit (「美食」 must
+ * match 曼谷美食 before it matches 曼谷美食攻略), while the subsequence tier
+ * keeps the requested out-of-order matching (「曼食」 finds 曼谷美食). The query
  * is split on whitespace into terms that must ALL match (Obsidian-style:
- * 「四川 资源」 finds 四川矿产资源); both the query and the titles are
+ * 「曼谷 美食」 finds 曼谷美食); both the query and the titles are
  * NFC-normalized. The empty query lists notes alphabetically by title. Zero
  * DOM, zero cordis — the per-keystroke filter runs on the client's cached
  * index.
@@ -48,7 +48,7 @@ function byDefault(a: NoteEntry, b: NoteEntry): number {
  * above single-term ones. Each term scores against four tiers, highest
  * first: title substring, title subsequence, path substring, path
  * subsequence. The contiguous tiers exist so a loose subsequence hit (e.g.
- * 「公考」 matching 公务员考核) never outranks a real substring hit; inside a
+ * 「曼食」 matching 曼谷美食) never outranks a real substring hit; inside a
  * tier the earliest greedy match position wins, and shorter paths win ties
  * through rankNotes' length break.
  * @param note - the indexed note.
@@ -78,7 +78,7 @@ function scoreTerm(note: NoteEntry, q: string): number {
   // Title contiguous substring (a prefix is position 0 and wins naturally).
   const atTitle = title.indexOf(q)
   if (atTitle >= 0) return 3000 - atTitle
-  // Title subsequence: the requested out-of-order matching (「成教」→ 成都教育).
+  // Title subsequence: the requested out-of-order matching (「曼食」→ 曼谷美食).
   const sTitle = subsequenceIndices(title, q)
   if (sTitle !== null) return 2000 - sTitle[0]
   // Relative-path contiguous substring.

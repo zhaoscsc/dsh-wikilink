@@ -30,7 +30,7 @@ export const TRIGGER: TriggerChar = '[' as TriggerChar
 
 /**
  * Design cap on picker rows. The menu viewport scrolls (max-height 320px),
- * so multi-term queries (e.g. 「四川 资源」) can surface deeper-but-valid
+ * so multi-term queries (e.g. 「曼谷 美食」) can surface deeper-but-valid
  * hits instead of clipping them at the first screenful.
  */
 export const MAX_CANDIDATES = 24
