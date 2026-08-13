@@ -1,5 +1,7 @@
 # dsh-wikilink
 
+> **中文版 README**：[README.zh.md](README.zh.md) · **简体中文文档入口**
+
 Obsidian-style `[[wikilink]]` mentions for the DeepSeek Harness web GUI. Type `[[` in the composer and a note-title picker floats up: fuzzy search your workspace notes as you type — including **out-of-order (subsequence) matches** (「曼食」 finds 曼谷街头美食文化观察) and **space-separated multi-term matches** (「曼谷 美食」 finds 曼谷街头美食文化观察 / 曼谷笔记：美食 / 曼谷朱拉隆功夜市美食探索). Press Enter to attach, and the referenced note content ships to the model when the message is sent.
 
 ```
