@@ -1,0 +1,12 @@
+{
+  "name": "dsh-wikilink",
+  "description": "Obsidian-style [[wikilink]] mentions for the DeepSeek Harness web GUI",
+  "version": "0.1.0",
+  "entry": {
+    "name": "dsh-wikilink",
+    "inject": []
+  },
+  "client": {
+    "platform": "web"
+  }
+}

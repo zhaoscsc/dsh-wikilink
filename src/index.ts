@@ -1,0 +1,85 @@
+/**
+ * dsh-wikilink host plugin: mounts the `wikilink` Typert Remote service
+ * (workspace note-title index for the browser's [[ picker), registers its
+ * strict Typert manifest, registers the settings enable switch, and expands
+ * `[[...]]` mentions at each agent's pre-step boundary — the model reads the
+ * referenced note content without a wire read. The client half ships in the
+ * same package (`./client`); the web server serves it under
+ * /plugins/dsh-wikilink/client.js.
+ */
+import type { Context } from '@deepseek-ai/cordis'
+import z from '@deepseek-ai/schemastery'
+// Type-only: brings the `ctx.typert` Context merge into this program.
+import type {} from '@deepseek-ai/dsh-typert-registry'
+// Type-only: brings the `ctx.settings` and `ctx.agents` Context merges in.
+import type {} from '@deepseek-ai/dsh-settings'
+import type {} from '@deepseek-ai/dsh-agent'
+import { WikilinkRuntime } from './runtime.ts'
+import { TYPERT_MANIFEST } from './typert.ts'
+import { registerWikilinkSettings } from './settings.ts'
+import { wikilinkPreStep } from './mention.ts'
+import type { ResolvedConfig } from './types.ts'
+
+/** Cordis plugin name (the Loader entry and client bundle id). */
+export const name = 'dsh-wikilink'
+
+/** Services required before load: the Typert registry, the settings provider, and the agent registry. */
+export const inject = ['typert', 'settings', 'agents']
+
+/** Host plugin configuration, validated at load by the Loader. */
+export interface Config {
+  /** Hard cap on indexed files per workspace; the walk stops and reports truncation. */
+  maxIndexedFiles: number
+  /** Hard cap on one file read; larger files are refused, never truncated. */
+  maxFileBytes: number
+  /** Directory basenames the index walk skips entirely. */
+  ignoreDirs: string[]
+}
+
+/**
+ * Configuration schema: deployment-varying bounds stay tunable from
+ * cordis.yml. The inferred schema type keeps the callable form accepting
+ * partial input, so `Config({})` yields the defaults (what the Loader does
+ * for cordis.yml compositions).
+ */
+export const Config = z.object({
+  // 100k covers large vaults (~40k entries here); the old 5k default
+  // truncated the walk in mid-tree and deep directories never indexed.
+  maxIndexedFiles: z.natural().min(1).default(100000),
+  maxFileBytes: z.natural().min(1).default(256 * 1024),
+  ignoreDirs: z.array(z.string()).default(['.git', 'node_modules']),
+})
+
+/**
+ * Mount the wikilink service and the pre-step mention expansion.
+ * @param ctx - host cordis context.
+ * @param config - validated plugin configuration (schema defaults applied).
+ */
+export function apply(ctx: Context, config?: Config): void {
+  const resolved: ResolvedConfig = Config(config ?? {})
+  // The durable enable switch: the runtime and the boundary read its live
+  // value per call, so toggling it in the Web settings takes effect immediately.
+  const settings = registerWikilinkSettings(ctx)
+  const isEnabled = (): boolean => settings.get().enabled
+  new WikilinkRuntime(ctx, resolved, isEnabled)
+  // Strict endpoint registration: the gateway resolves wikilink/search from
+  // this manifest, independent of decorator marker state.
+  ctx.effect(() => {
+    const dispose = ctx.typert.register(TYPERT_MANIFEST)
+    return () => { void dispose() }
+  }, 'dsh-wikilink: typert manifest')
+
+  // Expand [[ mentions for every agent, at its pre-step boundary. The
+  // listener lives on the agent's scope (the event is agent-scoped), so it
+  // registers per created agent and withdraws with it.
+  /* v8 ignore start -- agent-scoped registration glue; the boundary behavior is wikilinkPreStep and the event plumbing is harness-owned. */
+  ctx.on('agent/created', ({ agent }) => {
+    agent.ctx.effect(() => {
+      const stop = agent.ctx.on('agent/pre-step', async ({ messages, signal }, next) => {
+        return wikilinkPreStep(agent, resolved, isEnabled, messages, signal, next)
+      })
+      return () => { stop() }
+    }, 'dsh-wikilink: pre-step mention expansion')
+  })
+  /* v8 ignore stop */
+}
