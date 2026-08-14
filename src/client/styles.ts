@@ -66,10 +66,21 @@ export const cssText = `
   line-height: 20px;
 }
 .dsh_wikilink_index {
-  display: inline-flex;
+  /* The strip is a flex item of the composer stack (column flex), whose
+     default stretch alignment would blow the capsule up to the full row
+     width — wider than the input card below. Pin it to its content
+     (width: max-content), center it on the composer axis (margin: 0 auto),
+     and cap it at the card width so even a long error message can never
+     outgrow the input box. */
+  display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100% - var(--dsh-composer-side-clearance) - var(--dsh-composer-side-clearance) - var(--dsh-composer-dock-inset) - var(--dsh-composer-dock-inset));
+  margin: 0 auto;
+  flex: none;
   padding: 4px 12px;
   border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 999px;
@@ -77,6 +88,12 @@ export const cssText = `
   color: var(--dsw-alias-label-tertiary);
   font-size: 12px;
   line-height: 18px;
+}
+.dsh_wikilink_indexText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .dsh_wikilink_index_ok {
   color: var(--dsw-alias-ok-foreground, var(--dsw-alias-label-primary));

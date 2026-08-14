@@ -62,20 +62,20 @@ export function IndexStatusBar({ useScope, status, t }: IndexStatusProps) {
     return (
       <div className="dsh_wikilink_index" role="status">
         <span className="dsh_wikilink_indexSpinner" aria-hidden />
-        {t('index.indexing')}
+        <span className="dsh_wikilink_indexText">{t('index.indexing')}</span>
       </div>
     )
   }
   if (current.state === 'ready') {
     return (
       <div className="dsh_wikilink_index dsh_wikilink_index_ok" role="status">
-        {t('index.ready', { count: String(current.count) })}
+        <span className="dsh_wikilink_indexText">{t('index.ready', { count: String(current.count) })}</span>
       </div>
     )
   }
   return (
     <div className="dsh_wikilink_index dsh_wikilink_index_err" role="status">
-      {t('index.error', { message: current.message })}
+      <span className="dsh_wikilink_indexText">{t('index.error', { message: current.message })}</span>
     </div>
   )
 }
