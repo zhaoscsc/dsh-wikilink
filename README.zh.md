@@ -19,11 +19,13 @@ DeepSeek Harness Web GUI 的 Obsidian 风格 `[[双链]]` 引用插件。在输�
 
 ## 前置条件：harness 补丁（必须）
 
-harness 的输入触发管线只识别 `/` 和 `@` 两个触发字符，因此本插件附带对已安装 `@deepseek-ai` 客户端 bundle 的**三处小补丁**（都在 npx 安装缓存里）：
+harness 的输入触发管线只识别 `/` 和 `@` 两个触发字符，因此本插件附带对已安装 `@deepseek-ai` 客户端 bundle 的**五处小补丁**（都在 npx 安装缓存里）：
 
 1. `dsh-client-ui-input-trigger` — 识别 `[` 为触发字符，且只有 `[[` 双括号形式触发；`[[` token 可跨空格（标题含空格的笔记）
 2. `dsh-client-ui-conversation` — 输入 `[[` 自动补全 `]]` 并把光标居中（含输入法组合态守卫）
 3. `dsh-client-ui-input-trigger` — 菜单 CSS：选择器加宽（760px），标题占 70%
+4. `dsh-client-ui-input-trigger` — detectTrigger 空格跨词：`[[曼谷 美食]]`（中间带空格）也能匹配
+5. `dsh-client-ui-conversation` — 全角方括号归一化：中文输入法下输入 `【【` 自动归一化为 `[[`，选择器照常弹出，落盘仍是半角 `[[标题]]`
 
 **不打这些补丁，`[[` 触发和自动补全都不会工作。** 补丁内容见 [DEV.md](DEV.md)。重新安装 `@deepseek-ai/dsh`（npx 缓存重建）会覆盖补丁，需按 DEV.md 重新打。
 

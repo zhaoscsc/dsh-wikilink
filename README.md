@@ -19,11 +19,13 @@ Typing `[[` auto-closes `]]` with the caret between the brackets (Obsidian-style
 
 ## Prerequisites: harness patches
 
-The harness input pipeline only recognizes `/` and `@` as trigger characters, so this plugin ships with **three small patches** to the installed `@deepseek-ai` client bundles (all in the npx installation cache):
+The harness input pipeline only recognizes `/` and `@` as trigger characters, so this plugin ships with **five small patches** to the installed `@deepseek-ai` client bundles (all in the npx installation cache):
 
 1. `dsh-client-ui-input-trigger` — recognize `[` as a trigger, only in the `[[` double-bracket form; `[[` tokens may span spaces (note titles with spaces)
 2. `dsh-client-ui-conversation` — auto-close `[[` into `[[]]` with the caret centered (IME-composition guard included)
 3. `dsh-client-ui-input-trigger` — menu CSS: wider picker (760px) and 70% title share
+4. `dsh-client-ui-input-trigger` — `detectTrigger` whitespace-crossing: `[[曼谷 美食]]` (with a space) still matches
+5. `dsh-client-ui-conversation` — fullwidth-bracket normalization: `【【` typed under a Chinese IME is normalized to `[[` so the picker still opens and the landed token stays halfwidth `[[title]]`
 
 **Without these patches the `[[` trigger and the auto-close will not work.** See [DEV.md](DEV.md) for the exact patch snippets. Reinstalling `@deepseek-ai/dsh` (npx cache rebuild) wipes them — re-apply per DEV.md.
 

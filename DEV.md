@@ -20,7 +20,7 @@ cp -f lib/*.js lib/*.map ~/.dsh/profiles/web/node_modules/dsh-wikilink/lib/  # �
 - host 的 zod/schemastery 是 external，运行时从 `~/.dsh/profiles/node_modules`（heal 树）解析
 - 改完代码 → `node build.mjs` → 服务端按请求读盘，**刷新页面即生效**（host 侧改动需重启 `dsh web`）
 
-## 依赖 harness 的补丁（2 处）
+## 依赖 harness 的补丁（5 处）
 
 ### 1. `ui-input-trigger`：`[[` 触发器
 
@@ -32,15 +32,16 @@ if (ch !== "/" && ch !== "@" && ch !== "[") continue;
 if (ch === "[" && draft.charAt(i - 1) !== "[") continue;  // 只有 [[ 触发
 ```
 
-### 2. `ui-conversation`：`[[` 自动补全 `]]`
+### 2. `ui-conversation`：`[[` 自动补全 `]]` + 全角归一化
 
-InputBar 的 onChange（DOM 输入源头）里：draft 以 `[[` 结尾时自动补 `]]` 并把光标放到中间。
+InputBar 的 onChange（DOM 输入源头）里：draft 以 `[[` **或全角 `【【`** 结尾时自动补 `]]` 并把光标放到中间。全角是中文输入法（全角标点开启）下敲 `[` 两次的产物，归一化为 `[[` 后全链路（detectTrigger / onPick / host 注入）无感知。
 位于 `node_modules/@deepseek-ai/dsh-client-ui-conversation/lib/client.js`（InputBar 组件的 onChange）：
 
 ```js
-if (!e.nativeEvent?.isComposing && next.endsWith("[[")) {
-  const closed = next + "]]";
-  const caret = next.length;
+if ((next.endsWith("[[") || next.endsWith("【【")) && !e.nativeEvent?.isComposing) {
+  const normalized = next.endsWith("【【") ? next.slice(0, -2) + "[[" : next;
+  const closed = normalized + "]]";
+  const caret = normalized.length;
   const el = e.currentTarget;
   el.value = closed;
   el.setSelectionRange(caret, caret);
@@ -62,5 +63,21 @@ _3e4SsG_menu      max-width: min(537px,100%) → min(760px,100%)  （菜单加�
 ```
 
 `@` 文件菜单同样受益。
+
+### 4. `ui-input-trigger`：detectTrigger 空格跨词
+
+`[[曼谷 美食]]` 中间带空格时原实现直接返回 null（`if (WHITESPACE.test(ch)) return null;`），无候选。改为空格只记状态、`[[` 可跨空格，`/`、`@` 保持不跨空格：
+
+```js
+let crossedWhitespace = false;
+// loop 内：
+if (WHITESPACE.test(ch)) { crossedWhitespace = true; continue; }
+// 触发判定之后：
+if (crossedWhitespace && (ch === "/" || ch === "@")) return null;
+```
+
+### 5. `ui-conversation`：onChange 全角归一化（与 #2 同处）
+
+即 #2 补丁中 `next.endsWith("【【")` 分支（`normalized = next.slice(0, -2) + "[["`）。中文输入法下 `【【` 自动转半角 `[[`，选择器照常弹出，落盘仍是 `[[标题]]`。只处理**纯全角**；混排 `【[` / `[【` 不触发，避免误伤半角输入流。
 
 ⚠️ 重新安装 `@deepseek-ai/dsh`（npx 缓存重建）会覆盖以上所有补丁，需要重新打。
