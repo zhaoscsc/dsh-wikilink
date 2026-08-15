@@ -29,6 +29,8 @@ The harness input pipeline only recognizes `/` and `@` as trigger characters, so
 
 **Without these patches the `[[` trigger and the auto-close will not work.** See [DEV.md](DEV.md) for the exact patch snippets. Reinstalling `@deepseek-ai/dsh` (npx cache rebuild) wipes them — re-apply per DEV.md.
 
+> **IME caveat:** some Chinese input methods (Sogou, WeChat, Baidu, system Pinyin, …) have a **symbol auto-completion** feature (smart punctuation / bracket auto-pairing) that auto-inserts a closing bracket when you type `[` or `【` (`[` → `[]`, `【` → `【】`). That breaks the double-open detection and the picker never opens. **Disable symbol auto-completion in the input method settings** (it may be called smart punctuation / bracket auto-pairing / symbol suggestion).
+
 ## Install
 
 ```sh
