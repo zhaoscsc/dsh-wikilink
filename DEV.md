@@ -35,7 +35,7 @@ cp -f lib/*.js lib/*.map ~/.dsh/profiles/web/node_modules/dsh-wikilink/lib/  # �
 
 **为什么零补丁可行**：harness 的输入触发管线对插件是硬编码的（`TriggerChar = '/' | '@'`，`detectTrigger` 只认这两个），声明式做不到——但 harness 暴露了绕开管线的公开扩展面：`conversation.input.overlay` 插槽 + 会话标准套件（`useInput` / `inputActions`）。检测、渲染、写回全部在插件侧完成，无需改任何 `@deepseek-ai` bundle。
 
-**历史补丁（5 处，已成历史）**：早期版本靠 5 处 client.js 补丁实现 `[[` 触发 / 自动补 `]]` 光标居中 / 菜单 CSS 加宽 / 空格跨词 / `【【` 全角归一化，dsh 每次升级都会冲掉、需重打。这些能力现已被自绘实现取代，逐一对应关系与取舍见[零补丁自绘菜单设计](docs/superpowers/specs/2026-08-20-zero-patch-self-drawn-menu-design.md)（含 5→0 对照表）；`apply-harness-patches.mjs` 保留在仓库中**仅供存档**，不再参与安装流程。
+**历史补丁（5 处，已成历史）**：早期版本靠 5 处 client.js 补丁实现 `[[` 触发 / 自动补 `]]` 光标居中 / 菜单 CSS 加宽 / 空格跨词 / `【【` 全角归一化，dsh 每次升级都会冲掉、需重打。这些能力现已被自绘实现取代，逐一对应关系与取舍见[零补丁自绘菜单设计](docs/superpowers/specs/2026-08-20-zero-patch-self-drawn-menu-design.md)（含 5→0 对照表），补丁脚本已随零补丁改造删除，不再参与安装流程。
 
 ### ⚠️ 输入法「符号自动补全」与自检测冲突（必须先关）
 

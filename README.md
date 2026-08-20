@@ -19,7 +19,7 @@ Type `[[query` and the picker opens exactly on the double bracket; Enter replace
 
 ## No harness patches needed
 
-Earlier versions patched the installed `@deepseek-ai` client bundles to make the `[[` trigger work (the harness input pipeline only recognizes `/` and `@`). Since v0.2 the picker is fully self-drawn: the plugin watches the draft itself, renders its own floating menu on the public `conversation.input.overlay` slot, and writes the closed `[[title]]` back through the public input actions. **No patches, no re-apply step — install, restart, done.** The legacy patch script remains in the repo (`apply-harness-patches.mjs`) for history only.
+Earlier versions patched the installed `@deepseek-ai` client bundles to make the `[[` trigger work (the harness input pipeline only recognizes `/` and `@`). Since v0.2 the picker is fully self-drawn: the plugin watches the draft itself, renders its own floating menu on the public `conversation.input.overlay` slot, and writes the closed `[[title]]` back through the public input actions. **No patches, no re-apply step — install, restart, done.**
 
 ## Install
 
@@ -66,7 +66,7 @@ Real examples from a travel-note vault:
 
 ## Known limitations
 
-- The picker triggers on an unclosed `[[`/`【【` at the **end of the draft** only — the public input state carries no caret info, so caret-not-at-end doesn't trigger.
+- The picker triggers on the last unclosed `[[`/`【【` anywhere in the draft, with the query running to the draft end — the public input state carries no caret info, so caret-not-at-end doesn't trigger.
 - The self-drawn menu is styled and key-handled by the plugin itself, so it evolves independently from the `/` and `@` pipeline menus.
 - The workspace index is cached per session for 30 seconds; files created later appear on the next menu open after that window.
 - A note literally named `.md` is skipped (its empty title would fail the wire schema).

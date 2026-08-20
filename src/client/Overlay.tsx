@@ -40,8 +40,12 @@ export function WikilinkOverlay({ sessionId, useInput, inputActions, useScope, i
   const trigger = useMemo(() => findOpenTrigger(draft), [draft])
   const [highlight, setHighlight] = useState(0)
   const [candidates, setCandidates] = useState<readonly NoteEntry[]>([])
+  const [suppressed, setSuppressed] = useState(false)
   const abortRef = useRef<AbortController | undefined>(undefined)
-  const open = enabled && trigger !== null && input !== undefined
+  const open = enabled && !suppressed && trigger !== null && input !== undefined
+
+  // A manual close (Esc / outside click) stays until the draft changes again.
+  useEffect(() => { setSuppressed(false) }, [draft])
 
   // Re-rank on every draft/query change while open.
   useEffect(() => {
@@ -77,23 +81,22 @@ export function WikilinkOverlay({ sessionId, useInput, inputActions, useScope, i
         const hit = candidates[highlight]
         if (hit !== undefined) { e.preventDefault(); pick(hit.title) }
       }
-      else if (e.key === 'Escape') { /* draft no longer matches → menu auto-closes on next render; no-op safe */ }
+      else if (e.key === 'Escape') { e.preventDefault(); setSuppressed(true) }
     }
     document.addEventListener('keydown', onKeyDown, true)
     return () => document.removeEventListener('keydown', onKeyDown, true)
   }, [open, candidates, highlight, trigger, draft, input, inputActions])
 
-  // Click-outside: the menu closes itself when the draft loses the trigger,
-  // so a capture-phase listener only needs to swallow clicks that would land
-  // in the textarea and immediately re-open. Menu-internal clicks are handled
-  // by each item's onMouseDown preventDefault.
+  // Click-outside: a capture-phase mousedown outside the menu closes it. The
+  // `suppressed` flag keeps it closed until the next draft change, so the click
+  // lands in the textarea without the menu instantly re-opening. Menu-internal
+  // clicks are handled by each item's onMouseDown preventDefault.
   useEffect(() => {
     if (!open) return
     const onMouseDown = (e: MouseEvent): void => {
       const el = e.target as HTMLElement | null
-      if (el !== null && el.closest('.dsh_wikilink_menu') === null) {
-        // Let the click through; the draft no longer matches and the menu
-        // vanishes on the next render.
+      if (el === null || el.closest('.dsh_wikilink_menu') === null) {
+        setSuppressed(true)
       }
     }
     document.addEventListener('mousedown', onMouseDown, true)

@@ -24,7 +24,6 @@
       "platform": "web",
       "inject": [
         "@deepseek-ai/dsh-client-runtime",
-        "@deepseek-ai/dsh-client-ui-input-trigger",
         "@deepseek-ai/dsh-client-ui-slots",
         "@deepseek-ai/dsh-client-locale"
       ]
@@ -50,7 +49,6 @@
     "@deepseek-ai/dsh-typert-protocol": "*",
     "@deepseek-ai/dsh-client-runtime": "*",
     "@deepseek-ai/dsh-api-remotes": "*",
-    "@deepseek-ai/dsh-client-ui-input-trigger": "*",
     "@deepseek-ai/dsh-client-ui-slots": "*",
     "@deepseek-ai/dsh-client-ui-conversation": "*",
     "@deepseek-ai/dsh-client-locale": "*",
@@ -75,9 +73,6 @@
       "optional": true
     },
     "@deepseek-ai/dsh-api-remotes": {
-      "optional": true
-    },
-    "@deepseek-ai/dsh-client-ui-input-trigger": {
       "optional": true
     },
     "@deepseek-ai/dsh-client-ui-slots": {
@@ -119,7 +114,6 @@
     "@deepseek-ai/schemastery": "link:../dsh/vendor/schemastery",
     "@deepseek-ai/dsh-client-runtime": "link:../dsh/packages/client/runtime",
     "@deepseek-ai/dsh-api-remotes": "link:../dsh/packages/api/remotes",
-    "@deepseek-ai/dsh-client-ui-input-trigger": "link:../dsh/packages/client/ui-input-trigger",
     "@deepseek-ai/dsh-client-ui-slots": "link:../dsh/packages/client/ui-slots",
     "@deepseek-ai/dsh-client-ui-conversation": "link:../dsh/packages/client/ui-conversation",
     "@deepseek-ai/dsh-client-locale": "link:../dsh/packages/client/locale",
