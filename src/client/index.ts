@@ -94,7 +94,7 @@ export function apply(ctx: ClientContext): void {
     order: 10,
     locale: NS,
     inject: (): IndexStatusInjected => ({
-      status: { get: manager.getStatus, subscribe: manager.subscribeStatus },
+      status: manager,
       hooks: { scope },
     }),
   }, IndexStatusBar))

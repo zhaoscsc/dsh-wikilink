@@ -9,14 +9,11 @@ import { useEffect, useRef, useState } from 'react'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SettingsScope } from '@deepseek-ai/dsh-client-runtime/client'
 import type { WikilinkSettings } from '../contract.ts'
-import type { WikilinkIndexStatus } from './index-manager.ts'
+import type { IndexManager, WikilinkIndexStatus } from './index-manager.ts'
 
 /** Injected business face: the live status subscription and the settings scope. */
 export interface IndexStatusInjected {
-  status: {
-    get(): WikilinkIndexStatus
-    subscribe(listener: () => void): () => void
-  }
+  status: IndexManager
   hooks: { scope: SettingsScope<WikilinkSettings> }
 }
 
@@ -34,13 +31,13 @@ const ERROR_VISIBLE_MS = 8000
  */
 export function IndexStatusBar({ useScope, status, t }: IndexStatusProps) {
   const enabled = useScope(snapshot => snapshot.value?.enabled ?? true)
-  const [current, setCurrent] = useState<WikilinkIndexStatus>(() => status.get())
+  const [current, setCurrent] = useState<WikilinkIndexStatus>(() => status.getStatus())
   const [visible, setVisible] = useState(false)
   const hideTimer = useRef<number | undefined>(undefined)
 
   useEffect(() => {
-    return status.subscribe(() => {
-      const next = status.get()
+    return status.subscribeStatus(() => {
+      const next = status.getStatus()
       setCurrent(next)
       if (next.state === 'indexing') {
         setVisible(true)
