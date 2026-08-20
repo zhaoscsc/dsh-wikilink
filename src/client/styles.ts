@@ -116,9 +116,17 @@ export const cssText = `
   to { transform: rotate(360deg); }
 }
 .dsh_wikilink_menu {
+  /* The overlay slot's anchor is an absolutely-positioned zero-height layer
+     covering the composer; the menu must opt into floating above it exactly
+     like the harness's own trigger menu (position:absolute + bottom:calc),
+     otherwise it renders inline inside the anchor and overlaps the input. */
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
   display: flex;
   flex-direction: column;
-  min-width: 280px;
+  min-width: min(260px, 100%);
   max-width: 560px;
   max-height: 320px;
   overflow-y: auto;
