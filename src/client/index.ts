@@ -9,13 +9,12 @@
  */
 // Type-only: the ctx.remote merge and the forwarded Host-event face.
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
-import type { ConnectionHandle, SessionId } from '@deepseek-ai/dsh-api-remotes/client'
+import type { SessionId } from '@deepseek-ai/dsh-api-remotes/client'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 // Type-only: the ctx.locale Context merge.
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 // Type-only: the ctx.settingsScope Context merge and the scope contract.
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
-import type { SettingsScope } from '@deepseek-ai/dsh-client-runtime/client'
 import type { WikilinkSettings, NoteEntry } from '../contract.ts'
 import { WIKILINK_REMOTE } from './remote.ts'
 import { createIndexManager } from './index-manager.ts'
@@ -58,7 +57,6 @@ export function apply(ctx: ClientContext): void {
     }
   }, 'dsh-wikilink: remote')
 
-  const connection = ctx.get('connection') as ConnectionHandle
   const t = ctx.locale.bind(NS)
   const scope = ctx.settingsScope.bind<WikilinkSettings>({ namespace: 'wikilink' })
 
