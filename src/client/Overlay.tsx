@@ -78,8 +78,16 @@ export function WikilinkOverlay({ sessionId, useInput, inputActions, useScope, i
       if (e.key === 'ArrowDown') { e.preventDefault(); setHighlight(h => Math.min(h + 1, candidates.length - 1)) }
       else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlight(h => Math.max(h - 1, 0)) }
       else if (e.key === 'Enter') {
+        // The menu owns Enter while open: it must NEVER reach the composer's
+        // submit path. preventDefault stops the textarea default; stopPropagation
+        // (we're on document capture, before React's root listener) stops the
+        // InputBar keydown from sending the message. Pick the highlighted
+        // candidate when one exists; otherwise swallow the Enter so an empty
+        // state can't accidentally send.
+        e.preventDefault()
+        e.stopPropagation()
         const hit = candidates[highlight]
-        if (hit !== undefined) { e.preventDefault(); pick(hit.title) }
+        if (hit !== undefined) pick(hit.title)
       }
       else if (e.key === 'Escape') { e.preventDefault(); setSuppressed(true) }
     }
