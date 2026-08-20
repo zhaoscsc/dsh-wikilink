@@ -5,7 +5,7 @@
 Obsidian-style `[[wikilink]]` mentions for the DeepSeek Harness web GUI. Type `[[` in the composer and a note-title picker floats up: fuzzy search your workspace notes as you type — including **out-of-order (subsequence) matches** (「曼食」 finds 曼谷街头美食文化观察) and **space-separated multi-term matches** (「曼谷 美食」 finds 曼谷街头美食文化观察 / 曼谷笔记：美食 / 曼谷朱拉隆功夜市美食探索). Press Enter to attach, and the referenced note content ships to the model when the message is sent.
 
 ```
-composer:  summarize  [[曼谷 美.    ← picker over the token, auto-closed brackets
+composer:  summarize  [[曼谷 美.    ← picker over the open token
             ┌────────────────────────────────────────────────────────┐
             │ 📄 曼谷街头美食文化观察：鱼鳔老太太摊位的夜间消费场景          │
             │ 📄 曼谷笔记：美食                                     │
@@ -15,21 +15,11 @@ draft:     summarize  [[曼谷笔记：美食]]   ← readable plain-text token
 model:     <note path="5-存档/06-专题档案/数字游民/曼谷笔记：美食.md" title="曼谷笔记：美食">…content…</note>  ← injected at send time
 ```
 
-Typing `[[` auto-closes `]]` with the caret between the brackets (Obsidian-style), and the picker opens exactly on the double bracket — a single `[` in prose never triggers it.
+Type `[[query` and the picker opens exactly on the double bracket; Enter replaces the token with `[[title]]` and the caret lands after `]]` (Obsidian-style). A single `[` in prose never triggers it.
 
-## Prerequisites: harness patches
+## No harness patches needed
 
-The harness input pipeline only recognizes `/` and `@` as trigger characters, so this plugin ships with **five small patches** to the installed `@deepseek-ai` client bundles (all in the npx installation cache):
-
-1. `dsh-client-ui-input-trigger` — recognize `[` as a trigger, only in the `[[` double-bracket form; `[[` tokens may span spaces (note titles with spaces)
-2. `dsh-client-ui-conversation` — auto-close `[[` into `[[]]` with the caret centered (IME-composition guard included)
-3. `dsh-client-ui-input-trigger` — menu CSS: wider picker (760px) and 70% title share
-4. `dsh-client-ui-input-trigger` — `detectTrigger` whitespace-crossing: `[[曼谷 美食]]` (with a space) still matches
-5. `dsh-client-ui-conversation` — fullwidth-bracket normalization: `【【` typed under a Chinese IME is normalized to `[[` so the picker still opens and the landed token stays halfwidth `[[title]]`
-
-**Without these patches the `[[` trigger and the auto-close will not work.** See [DEV.md](DEV.md) for the exact patch snippets. Reinstalling `@deepseek-ai/dsh` (npx cache rebuild) wipes them — re-apply per DEV.md.
-
-> **IME caveat:** some Chinese input methods (Sogou, WeChat, Baidu, system Pinyin, …) have a **symbol auto-completion** feature (smart punctuation / bracket auto-pairing) that auto-inserts a closing bracket when you type `[` or `【` (`[` → `[]`, `【` → `【】`). That breaks the double-open detection and the picker never opens. **Disable symbol auto-completion in the input method settings** (it may be called smart punctuation / bracket auto-pairing / symbol suggestion).
+Earlier versions patched the installed `@deepseek-ai` client bundles to make the `[[` trigger work (the harness input pipeline only recognizes `/` and `@`). Since v0.2 the picker is fully self-drawn: the plugin watches the draft itself, renders its own floating menu on the public `conversation.input.overlay` slot, and writes the closed `[[title]]` back through the public input actions. **No patches, no re-apply step — install, restart, done.** The legacy patch script remains in the repo (`apply-harness-patches.mjs`) for history only.
 
 ## Install
 
@@ -76,9 +66,11 @@ Real examples from a travel-note vault:
 
 ## Known limitations
 
+- The picker triggers on an unclosed `[[`/`【【` at the **end of the draft** only — the public input state carries no caret info, so caret-not-at-end doesn't trigger.
+- The self-drawn menu is styled and key-handled by the plugin itself, so it evolves independently from the `/` and `@` pipeline menus.
 - The workspace index is cached per session for 30 seconds; files created later appear on the next menu open after that window.
 - A note literally named `.md` is skipped (its empty title would fail the wire schema).
-- Keyboard navigation beyond Enter/Escape is provided by the harness pipeline (same as the `/` and `@` menus).
+- **IME caveat:** some Chinese input methods (Sogou, WeChat, Baidu, system Pinyin, …) have a **symbol auto-completion** feature (smart punctuation / bracket auto-pairing) that auto-inserts a closing bracket when you type `[` or `【` (`[` → `[]`, `【` → `【】`). That breaks the double-open detection and the picker never opens. **Disable symbol auto-completion in the input method settings** (it may be called smart punctuation / bracket auto-pairing / symbol suggestion).
 
 ## Development
 
@@ -86,7 +78,7 @@ Real examples from a travel-note vault:
 node build.mjs        # esbuild is vendored under ./node_modules; zod is inlined into the client bundle
 ```
 
-See [DEV.md](DEV.md) for the architecture, the harness patch snippets, and the build/dev loop.
+See [DEV.md](DEV.md) for the architecture (self-drawn picker — no harness patches) and the build/dev loop.
 
 ## License
 
