@@ -50,7 +50,7 @@ describe('findOpenTrigger', () => {
     expect(findOpenTrigger('先写点 [[曼')).toEqual({ start: 4, query: '曼', fullwidth: false })
   })
   it('ignores a closed [[…]] pair and finds a later open one', () => {
-    expect(findOpenTrigger('[[A]] 再写 [[曼')).toEqual({ start: 8, query: '曼', fullwidth: false })
+    expect(findOpenTrigger('[[A]] 再写 [[曼')).toEqual({ start: 9, query: '曼', fullwidth: false })
   })
   it('returns null when nothing is open', () => {
     expect(findOpenTrigger('普通文本')).toBeNull()
@@ -167,7 +167,7 @@ export function stripTrailingBrackets(query: string): string {
 - [ ] **Step 4: 运行确认通过**
 
 Run: `node_modules/.bin/vitest run tests/detect.spec.ts`
-Expected: PASS（8 it 全部通过）
+Expected: PASS（10 it 全部通过）
 
 - [ ] **Step 5: 提交**
 
