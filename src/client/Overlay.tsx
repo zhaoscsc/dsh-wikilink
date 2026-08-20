@@ -102,7 +102,6 @@ export function WikilinkOverlay({ sessionId, useInput, inputActions, useScope, i
 
   if (!open) return null
 
-  const query = trigger !== null ? stripTrailingBrackets(trigger.query) : ''
   const empty = candidates.length === 0
 
   return (
