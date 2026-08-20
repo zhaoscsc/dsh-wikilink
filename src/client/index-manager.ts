@@ -19,6 +19,9 @@ export interface NoteEntry {
 /** How long one session's index stays hot before the next menu open refetches. */
 export const INDEX_TTL_MS = 30_000
 
+/** Design cap on picker rows. The menu viewport scrolls (max-height 320px), so multi-term queries (e.g. 「曼谷 美食」) can surface deeper-but-valid hits instead of clipping them at the first screenful. */
+export const MAX_CANDIDATES = 24
+
 /** Index lifecycle for the status strip: idle → indexing → ready | error. */
 export type WikilinkIndexStatus =
   | { readonly state: 'idle' }

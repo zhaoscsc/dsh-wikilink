@@ -14,7 +14,7 @@ import type { IndexManager } from './index-manager.ts'
 import type { NoteEntry } from './index-manager.ts'
 import { findOpenTrigger, replaceTrigger, stripTrailingBrackets } from './detect.ts'
 import { rankNotes } from './search.ts'
-import { MAX_CANDIDATES } from './source.ts'
+import { MAX_CANDIDATES } from './index-manager.ts'
 
 /** Full overlay entry props: runtime standard kit + locale seat. */
 export type OverlayProps = PropsRuntime<'conversation.input.overlay'> & PropsLocale<'wikilink'>

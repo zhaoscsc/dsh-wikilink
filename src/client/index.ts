@@ -1,15 +1,16 @@
 /**
  * dsh-wikilink client plugin: the browser half of the Obsidian-style [[
- * mention. Mounts the wikilink Remote namespace, registers the '[[' trigger
- * source (floating picker landing a plain-text [[title]] token), the settings
- * section, and the locale dictionaries. Content expansion is the Host's job
- * at its pre-step boundary; this half only picks and links.
+ * mention. Mounts the wikilink Remote namespace, registers the self-drawn
+ * picker on the `conversation.input.overlay` slot (no harness trigger
+ * pipeline — the plugin detects `[[` from the live draft itself via
+ * useInput), the settings section, and the locale dictionaries. Content
+ * expansion is the Host's job at its pre-step boundary; this half only
+ * picks and links.
  */
 // Type-only: the ctx.remote merge and the forwarded Host-event face.
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
 import type { ConnectionHandle, SessionId } from '@deepseek-ai/dsh-api-remotes/client'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
-import type { InputTriggerServiceContract } from '@deepseek-ai/dsh-client-ui-input-trigger/client'
 // Type-only: the ctx.locale Context merge.
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 // Type-only: the ctx.settingsScope Context merge and the scope contract.
@@ -17,14 +18,15 @@ import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { SettingsScope } from '@deepseek-ai/dsh-client-runtime/client'
 import type { WikilinkSettings, NoteEntry } from '../contract.ts'
 import { WIKILINK_REMOTE } from './remote.ts'
-import { createWikilinkSource } from './source.ts'
+import { createIndexManager } from './index-manager.ts'
+import { WikilinkOverlay, type OverlayInjected } from './Overlay.tsx'
 import { WikilinkSection, type WikilinkSectionInjected } from './SettingsSection.tsx'
 import { IndexStatusBar, type IndexStatusInjected } from './IndexStatusBar.tsx'
 import { NS, zh, en } from './locales.ts'
 import { adoptStyles } from './styles.ts'
 
-/** Required services: picker pipeline, session projection, carrier, Remote face, slots, locale, settings scope. */
-export const inject = ['inputTriggers', 'sessions', 'connection', 'remote', 'slots', 'locale', 'settingsScope']
+/** Required services: session projection, carrier, Remote face, slots, locale, settings scope. */
+export const inject = ['sessions', 'connection', 'remote', 'slots', 'locale', 'settingsScope']
 
 /** The mounted wikilink namespace service's callable face. */
 interface WikilinkNamespaceFace {
@@ -57,7 +59,6 @@ export function apply(ctx: ClientContext): void {
   }, 'dsh-wikilink: remote')
 
   const connection = ctx.get('connection') as ConnectionHandle
-  const inputTriggers = ctx.get('inputTriggers') as InputTriggerServiceContract
   const t = ctx.locale.bind(NS)
   const scope = ctx.settingsScope.bind<WikilinkSettings>({ namespace: 'wikilink' })
 
@@ -68,35 +69,24 @@ export function apply(ctx: ClientContext): void {
     return result.value
   }
 
-  const { source, invalidateAll, getStatus, subscribeStatus } = createWikilinkSource({ search, t })
+  const manager = createIndexManager({ search })
   // Reconnect may have rebuilt the host: cached indexes die with it.
   ctx.on('connection/reset', () => {
-    invalidateAll()
+    manager.invalidateAll()
   })
-  // The settings switch gates the picker live: the source registers while the
-  // namespace value is enabled (undefined before the first settings read —
-  // the schema default is enabled) and unregisters the moment it flips off.
-  let sourceRegistered = false
-  let sourceDispose = (): void => {}
-  const syncSource = (): void => {
-    const enabled = scope.getSnapshot().value?.enabled ?? true
-    if (enabled && !sourceRegistered) {
-      sourceDispose = inputTriggers.registerSource(source)
-      sourceRegistered = true
-    } else if (!enabled && sourceRegistered) {
-      sourceDispose()
-      sourceDispose = () => {}
-      sourceRegistered = false
-    }
-  }
-  ctx.effect(() => {
-    syncSource()
-    const off = scope.subscribe(syncSource)
-    return () => {
-      off()
-      sourceDispose()
-    }
-  }, 'dsh-wikilink: source (settings-gated)')
+
+  // Self-drawn picker: overlay slot entry. The component owns detection
+  // (useInput → draft), ranking, and insertion (inputActions.setDraft).
+  ctx.slots.inject('conversation.input.overlay', () => ctx.slots.register({
+    name: 'conversation.input.overlay',
+    id: 'wikilink-picker',
+    order: 10,
+    locale: NS,
+    inject: (): OverlayInjected => ({
+      index: manager,
+      hooks: { scope },
+    }),
+  }, WikilinkOverlay))
 
   // The index-status strip: one line above the composer while the workspace
   // index is building, and a brief ready/error notice afterwards.
@@ -106,10 +96,7 @@ export function apply(ctx: ClientContext): void {
     order: 10,
     locale: NS,
     inject: (): IndexStatusInjected => ({
-      status: {
-        get: getStatus,
-        subscribe: subscribeStatus,
-      },
+      status: { get: manager.getStatus, subscribe: manager.subscribeStatus },
       hooks: { scope },
     }),
   }, IndexStatusBar))
