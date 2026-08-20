@@ -4,6 +4,8 @@
  * per client plugin, so no separate CSS artifact may exist. Tokens come only
  * from the shared `--dsw-alias-*` design platform (no literal colors); class
  * names carry the `dsh_wikilink` prefix to stay unique in the assembled shell.
+ * Besides the settings section it also carries the `[[` picker menu styles
+ * (`.dsh_wikilink_menu*` classes) used by the overlay picker.
  */
 
 /** Stable `<style>` element id (idempotent injection across HMR re-runs). */
@@ -112,6 +114,65 @@ export const cssText = `
 }
 @keyframes dsh_wikilink_spin {
   to { transform: rotate(360deg); }
+}
+.dsh_wikilink_menu {
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+  max-width: 560px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--dsw-alias-border-inverted);
+  border-radius: 12px;
+  background: var(--dsw-specific-menu);
+  box-shadow: var(--dsw-shadow-lv3);
+}
+.dsh_wikilink_menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: var(--dsw-alias-label-primary);
+  text-align: left;
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+}
+.dsh_wikilink_menuItem:hover,
+.dsh_wikilink_menuItem_active {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+.dsh_wikilink_menuIcon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.dsh_wikilink_menuName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: none;
+  max-width: 70%;
+}
+.dsh_wikilink_menuDir {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+  color: var(--dsw-alias-label-tertiary);
+}
+.dsh_wikilink_menuEmpty {
+  padding: 12px 10px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+  line-height: 20px;
 }
 `
 
