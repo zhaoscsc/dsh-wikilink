@@ -28,6 +28,7 @@ export type WikilinkIndexStatus =
 
 /** Everything the manager needs from the host Remote. */
 export interface IndexManagerDeps {
+  /** Resolve one session's workspace note index (host Remote wrapper). */
   search(sessionId: SessionId, signal: AbortSignal): Promise<readonly NoteEntry[]>
   /** Monotonic clock for index freshness (default Date.now). */
   now?: () => number
@@ -84,14 +85,18 @@ export function createIndexManager(deps: IndexManagerDeps): IndexManager {
     fetches.set(sessionId, entry)
     promise.then(
       (notes) => {
+        if (fetches.get(sessionId) !== entry) return
         entry.settled = notes
         setStatus({ state: 'ready', count: notes.length })
       },
       (error: unknown) => {
-        if (fetches.get(sessionId) === entry) fetches.delete(sessionId)
+        if (fetches.get(sessionId) !== entry) return
+        fetches.delete(sessionId)
         setStatus({ state: 'error', message: error instanceof Error ? error.message : String(error) })
       },
     )
+    // A superseded keystroke just yields early; the shared fetch stays warm
+    // (its own handlers already contain settlement).
     if (signal !== undefined) {
       return promise.then(notes => (signal.aborted ? [] : notes))
     }
